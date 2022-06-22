@@ -1,17 +1,19 @@
-import { Controller, Param, Post, Req, Res, StreamableFile, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Param, Post, Req, Res, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage} from 'multer';
 import * as fs from 'fs';
-import * as libre from 'libreoffice-convert';
 import  {Response} from 'express';
 import { ConvertToPdfService } from "src/Services/convert.topdf.service";
+import { ModifyPdfService } from "src/Services/modify.pdf.service";
+import { ConvertOptionsDto } from "Dto/convert.options.dto";
 
 @Controller('upload')
 
 export class UploadController{
-    constructor(private readonly convertToPdfService: ConvertToPdfService) {}
+    constructor(private readonly convertToPdfService: ConvertToPdfService,
+                private readonly modifyPdfService: ModifyPdfService) {}
 
-    @Post('/:ext')
+    @Post('/:convert')
     @UseInterceptors(
         FileInterceptor('file', {
             storage: diskStorage({
@@ -28,8 +30,8 @@ export class UploadController{
             }
         })
     )
-     upload(@UploadedFile() file: any, @Req() req, @Res() response: Response, @Param('ext') ext: string) {
-
+    async upload(@UploadedFile() file: any, @Req() req, @Res() response: Response, @Param('convert') convert: string) {
+       
         if(req.ErrorMesage) {
             fs.unlinkSync(file.path);
             return response.status(200).send({
@@ -38,9 +40,15 @@ export class UploadController{
             });
         }
 
-        if(ext === 'pdf') 
-            return this.convertToPdfService.convert(file.path, file.originalname, response, ext)
+        if(convert === 'pdf') 
+            return this.convertToPdfService.convert(file.path, file.originalname, response)
 
-        
+        // if(convert === 'modify')
+        //     return await this.modifyPdfService.modifyPdf(data, file.originalname, response)
+
+        return response.status(200).send({
+            status: 'Upload',
+            fileName: file.originalname
+        })
     }
 }

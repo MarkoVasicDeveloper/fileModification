@@ -7,22 +7,23 @@ import * as libre from 'libreoffice-convert';
 
 export class ConvertToPdfService{
     
-    convert(filePath: fs.PathOrFileDescriptor, fileOriginName: string, response: any, ext: string) {
+    convert(filePath: fs.PathOrFileDescriptor, fileOriginName: string, response: any) {
         
         const file = fs.readFileSync(filePath);
  
-        libre.convert(file,`.${ext}`, undefined, (err, done) => {
+        libre.convert(file,`.pdf`, undefined, (err, done) => {
            if (err) {
              console.log(`Error converting file: ${err}`);
            }
       
-          fs.writeFileSync(`Convert/${fileOriginName}.${ext}`, done);
+          fs.writeFileSync(`Convert/${fileOriginName}.pdf`, done);
 
           fs.unlinkSync(`Uploads/${fileOriginName}`)
           response.status(200)
           return response.send({
               status: 'Converted',
-              file: `http://localhost:4000/download/${fileOriginName}/${ext}`
+              file: `http://localhost:4000/download/${fileOriginName}.pdf`,
+              fileName: fileOriginName
           })
        });
     }

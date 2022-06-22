@@ -6,13 +6,13 @@ import { join } from "path";
 
 export class DownloadController{
 
-    @Get('/:file/:ext')
-    download(@Param('file') file: any,@Param('ext') ext: string, @Response({ passthrough: true }) res) {
+    @Get('/:file')
+    download(@Param('file') file: any, @Response({ passthrough: true }) res) {
         
-        const readStream = fs.createReadStream(join(process.cwd(), `Convert/${file}.${ext}`));
+        const readStream = fs.createReadStream(join(process.cwd(), `Convert/${file}`));
         res.set({
-            'Content-Type': `application/${ext}`,
-            'Content-Disposition': `attachment; filename="${file}.${ext}"`
+            'Content-Type': `application/pdf`,
+            'Content-Disposition': `attachment; filename="${file}"`
           })
         return new StreamableFile(readStream);
     }
