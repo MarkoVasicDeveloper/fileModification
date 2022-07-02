@@ -1,17 +1,14 @@
-import { Body, Controller, Param, Post, Req, Res, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { Controller, Param, Post, Req, Res, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage} from 'multer';
 import * as fs from 'fs';
 import  {Response} from 'express';
 import { ConvertToPdfService } from "src/Services/convert.topdf.service";
-import { ModifyPdfService } from "src/Services/modify.pdf.service";
-import { ConvertOptionsDto } from "Dto/convert.options.dto";
 
 @Controller('upload')
 
 export class UploadController{
-    constructor(private readonly convertToPdfService: ConvertToPdfService,
-                private readonly modifyPdfService: ModifyPdfService) {}
+    constructor(private readonly convertToPdfService: ConvertToPdfService) {}
 
     @Post('/:convert')
     @UseInterceptors(
@@ -22,7 +19,7 @@ export class UploadController{
             }),
             fileFilter: (req, file, callback) => {
                 if(!file.originalname
-                    .match(/\.(pdf|doc|docx|xlsx|xls|ppt|pptx|pdd|odg|jpg|jpeg|png|gif|psd|bmp|html)/)) {
+                    .match(/\.(pdf|doc|docx|xlsx|xls|ppt|pptx|pdd|odg|jpg|jpeg|png|gif|psd|bmp|html)$/)) {
                     req.ErrorMesage = 'Bad extension';
                     callback(null, false);
                 }
@@ -43,12 +40,12 @@ export class UploadController{
         if(convert === 'pdf') 
             return this.convertToPdfService.convert(file.path, file.originalname, response)
 
-        // if(convert === 'modify')
-        //     return await this.modifyPdfService.modifyPdf(data, file.originalname, response)
+        const allFonts = fs.readdirSync('Fonts').map(file => file.slice(0, file.length - 4))
 
         return response.status(200).send({
             status: 'Upload',
-            fileName: file.originalname
+            fileName: file.originalname,
+            fonts: allFonts
         })
     }
 }

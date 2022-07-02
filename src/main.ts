@@ -9,10 +9,6 @@ async function bootstrap() {
     prefix: ''
   });
 
-  // app.useStaticAssets('../Convert', {
-  //   prefix: '/download'
-  // });
-
   app.enableCors();
   
   await app.listen(4000);
